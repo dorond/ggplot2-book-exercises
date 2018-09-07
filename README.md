@@ -1,0 +1,1 @@
+# Exercise solutions for **_ggplot2: Elegant Graphics for Data Analysis, 2nd edition_** by Hadley Wickham
