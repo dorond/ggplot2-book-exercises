@@ -1,0 +1,104 @@
+---
+title: "Chapter 2"
+author: "Doron Dusheiko"
+date: "07 September 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 2.2.1 
+
+> List five functions that you could use to get more information about the mpg dataset.
+
+```{r}
+mpg
+```
+```{r}
+dim(mpg)
+names(mpg)
+```
+
+
+```{r}
+glimpse(mpg)
+head(mpg)
+tail(mpg)
+
+```
+
+> How can you find out what other datasets are included with ggplot2?
+
+They are listed https://ggplot2.tidyverse.org/reference/#section-data
+
+> Apart from the US, most countries use fuel consumption (fuel consumed over fixed distance) rather than fuel economy (distance travelled with fixed amount of fuel). How could you convert cty and hwy into the European standard of l/100 km?
+
+`cty` and `hwy` are in miles per gallon, so we'll need to perform a unit conversion to make them litres per 100km. 
+
+We can proceed as follows:
+
+- Invert the value so we get gallons per mile.
+- Multiply by 0.621371 miles per km.
+- Multiply by 3.78541 litres per gallon.
+- Multiply by 100 km per 100 km.
+
+Example:
+
+```{r}
+mpg %>%
+  mutate(cty_l_per_100km = 1 / cty * 0.621371 * 3.78541 * 100) %>%
+  select(cty, cty_l_per_100km)
+```
+
+> Which manufacturer has the most the models in this dataset? Which model has the most variations? Does your answer change if you remove the redundant specification of drive train (e.g. “pathfinder 4wd”, “a4 quattro”) from the model name?
+
+The most models:
+
+```{r}
+mpg %>% 
+  group_by(manufacturer) %>%
+  distinct(model) %>%
+  count() %>%
+  arrange(desc(n))
+```
+
+Toyota has the most models. 
+
+Most variations:
+
+```{r}
+#arrange(unique(mpg$model))
+mpg %>% 
+  select(manufacturer, model) %>%
+  distinct()
+```
+
+- `a4` has two varieties. 
+- `camry` has two varieties
+
+Removing redundant drive train specifier:
+
+```{r}
+library(stringr)
+
+unique(str_trim(str_replace_all(mpg$model, c("quattro" = "", "2wd" = "", "4wd" = ""))))
+
+```
+
+Now only the camry has an additional model variety. 
+
+## 2.3.1
+
+> How would you describe the relationship between cty and hwy? Do you have any concerns about drawing conclusions from that plot?
+
+```{r}
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point()
+```
+
+Highway and city fuel efficiency appear positively correlated however which one would expect, however this doesn't give us much new information as they are both related to the underlying speed of the car. 
+
+
